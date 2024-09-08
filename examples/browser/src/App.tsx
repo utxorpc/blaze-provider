@@ -13,7 +13,7 @@ import {
   Core,
   Blaze,
 } from "@blaze-cardano/sdk";
-import { U5C } from "@saibdev/blaze-provider";
+import { U5C } from "@utxorpc/blaze-provider";
 
 
 async function main() {
