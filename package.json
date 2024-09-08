@@ -1,0 +1,38 @@
+{
+  "name": "@utxorpc/blaze-provider",
+  "version": "0.1.0",
+  "description": "An UTxO RPC provider for the Blaze transaction builder",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js"
+    }
+  },
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "clean": "rm -rf node_modules && rm -rf lib",
+    "prepublish": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@blaze-cardano/core": "^0.4.4",
+    "@blaze-cardano/query": "^0.2.15",
+    "@blaze-cardano/sdk": "^0.1.30",
+    "@blaze-cardano/tsconfig": "^0.0.2",
+    "@utxorpc/sdk": "0.6.0",
+    "@utxorpc/spec": "^0.10.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4"
+  }
+}
