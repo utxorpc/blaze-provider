@@ -1,0 +1,8 @@
+{
+    "extends": "@blaze-cardano/tsconfig/base.json",
+    "exclude": [
+        "lib",
+        "node_modules",
+        "examples"
+    ]
+}
