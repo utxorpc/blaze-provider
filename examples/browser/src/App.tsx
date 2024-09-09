@@ -1,6 +1,6 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
 // Step #1
 // Import Blaze SDK and U5C provider
 import {
@@ -8,13 +8,8 @@ import {
   mnemonicToEntropy,
   wordlist,
 } from "@blaze-cardano/core";
-import {
-  HotWallet,
-  Core,
-  Blaze,
-} from "@blaze-cardano/sdk";
+import { HotWallet, Core, Blaze } from "@blaze-cardano/sdk";
 import { U5C } from "@utxorpc/blaze-provider";
-
 
 async function main() {
   // Step #2
@@ -23,13 +18,13 @@ async function main() {
   // but you can run a local Dolos https://github.com/txpipe/dolos instance and connect to its UTxO endpoint
   // If this is the case then you can remove the headers field
   const provider = new U5C({
-      url: "http://localhost:50051"
+    url: "http://localhost:50051",
   });
 
   // Step #3
   // Create a new wallet from a mnemonic
   const mnemonic =
-      "end link visit estate sock hurt crucial forum eagle earn idle laptop wheat rookie when hard suffer duty kingdom clerk glide mechanic debris jar";
+    "end link visit estate sock hurt crucial forum eagle earn idle laptop wheat rookie when hard suffer duty kingdom clerk glide mechanic debris jar";
   const entropy = mnemonicToEntropy(mnemonic, wordlist);
   const masterkey = Bip32PrivateKey.fromBip39Entropy(Buffer.from(entropy), "");
   const wallet = await HotWallet.fromMasterkey(masterkey.hex(), provider);
@@ -47,14 +42,14 @@ async function main() {
   // Step #5
   // Create a example transaction that sends 5 ADA to an address
   const tx = await blaze
-      .newTransaction()
-      .payLovelace(
-          Core.Address.fromBech32(
-              "addr_test1qrnrqg4s73skqfyyj69mzr7clpe8s7ux9t8z6l55x2f2xuqra34p9pswlrq86nq63hna7p4vkrcrxznqslkta9eqs2nsmlqvnk",
-          ),
-          5_000_000n,
-      )
-      .complete();
+    .newTransaction()
+    .payLovelace(
+      Core.Address.fromBech32(
+        "addr_test1qrnrqg4s73skqfyyj69mzr7clpe8s7ux9t8z6l55x2f2xuqra34p9pswlrq86nq63hna7p4vkrcrxznqslkta9eqs2nsmlqvnk",
+      ),
+      5_000_000n,
+    )
+    .complete();
 
   // Step #6
   // Sign the transaction
@@ -67,7 +62,6 @@ async function main() {
   // Optional: Print the transaction ID
   console.log("Transaction ID", txId);
 }
-
 
 function App() {
   main().catch(console.error);
