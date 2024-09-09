@@ -1,8 +1,10 @@
 {
-    "extends": "@blaze-cardano/tsconfig/base.json",
-    "exclude": [
-        "lib",
-        "node_modules",
-        "examples"
-    ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
 }
