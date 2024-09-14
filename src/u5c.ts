@@ -26,6 +26,7 @@ import {
   toHex,
   PlutusLanguageVersion,
   hardCodedProtocolParams,
+  PlutusV3Script,
 } from "@blaze-cardano/core";
 import type { Provider } from "@blaze-cardano/query";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
@@ -245,11 +246,21 @@ export class U5C implements Provider {
           ),
         );
       }
+
       if (rpcTxOutput.script.script.case === "plutusV2") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
           Script.newPlutusV2Script(
             PlutusV2Script.fromCbor(HexBlob.fromBytes(cbor)),
+          ),
+        );
+      }
+
+      if (rpcTxOutput.script.script.case == "plutusV3") {
+        const cbor = rpcTxOutput.script.script.value;
+        output.setScriptRef(
+          Script.newPlutusV3Script(
+            PlutusV3Script.fromCbor(HexBlob.fromBytes(cbor)),
           ),
         );
       }
