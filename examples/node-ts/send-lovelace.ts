@@ -15,10 +15,7 @@ async function main() {
   // but you can run a local Dolos https://github.com/txpipe/dolos instance and connect to its UTxO endpoint
   // If this is the case then you can remove the headers field
   const provider = new U5C({
-    url: "http://localhost:50051",
-    headers: {
-      "dmtr-api-key": "<api-key>",
-    },
+      url: "http://localhost:50051"
   });
 
   // Step #3
