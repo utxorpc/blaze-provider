@@ -1,4 +1,19 @@
-# Blaze UTxO RPC Provider 🚀
+<div align="center">
+  <h1 style="font-size: 3em;">Blaze UTxO RPC Provider 🚀</h1>
+  <h4>A gRPC interface for Blaze Cardano transaction building library</h4>
+</div>
+
+<div align="center">
+
+  ![Forks](https://img.shields.io/github/forks/utxorpc/blaze-provider.svg?style=social) 
+  ![Stars](https://img.shields.io/github/stars/utxorpc/blaze-provider.svg?style=social) 
+  ![Contributors](https://img.shields.io/github/contributors/utxorpc/blaze-provider.svg) 
+  ![Issues](https://img.shields.io/github/issues/utxorpc/blaze-provider.svg) 
+  ![Issues Closed](https://img.shields.io/github/issues-closed/utxorpc/blaze-provider.svg)
+  <a href="https://www.npmjs.com/package/@utxorpc/blaze-provider">
+    <img src="https://img.shields.io/npm/v/@utxorpc/blaze-provider.svg" alt="npm">
+  </a>
+</div>
 
 This project provides a **UTxO RPC (u5c)** provider for use with the [Blaze](https://github.com/butaneprotocol/blaze-cardano)
 transaction-building library. The provider allows JavaScript/TypeScript applications to interact with UTxO-based blockchains, such as **Cardano**, using the standardized UTxO RPC interface.
