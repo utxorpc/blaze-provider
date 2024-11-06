@@ -35,13 +35,13 @@ The **UTxO RPC (u5c)** provider enables Blaze to access this state in a standard
 To install the UTxO RPC provider, use npm:
 
 ```bash
-npm install @utxorpc/blaze-provider
+npm i @utxorpc/blaze-provider
 ```
 
 You also need to install the **Blaze SDK** if you haven’t already:
 
 ```bash
-npm install @blaze-cardano/sdk
+npm i @blaze-cardano/sdk
 ```
 
 ## 💡 Basic Usage
