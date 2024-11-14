@@ -6,6 +6,7 @@ import "./App.css";
 import {
   Bip32PrivateKey,
   mnemonicToEntropy,
+  NetworkId,
   wordlist,
 } from "@blaze-cardano/core";
 import { HotWallet, Core, Blaze } from "@blaze-cardano/sdk";
@@ -19,6 +20,7 @@ async function main() {
   // If this is the case then you can remove the headers field
   const provider = new U5C({
     url: "http://localhost:50051",
+    network: NetworkId.Testnet
   });
 
   // Step #3
