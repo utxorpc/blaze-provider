@@ -29,10 +29,10 @@ import {
   PlutusV3Script,
 } from "@blaze-cardano/core";
 import type { Provider } from "@blaze-cardano/query";
+import { cborToScript } from "@blaze-cardano/sdk";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
 import type * as spec from "@utxorpc/spec";
-import * as cbor from 'cbor';
 
 export class U5C implements Provider {
   private queryClient: CardanoQueryClient;
@@ -240,32 +240,30 @@ export class U5C implements Provider {
 
     if (rpcTxOutput.script !== undefined) {
       if (rpcTxOutput.script.script.case === "plutusV1") {
-        const cborValue = cbor.encode(rpcTxOutput.script.script.value);
-        const cborUint8Array = new Uint8Array(cborValue);
+        // const cborValue = cbor.encode(rpcTxOutput.script.script.value);
+        // const cborUint8Array = new Uint8Array(cborValue);
+        const cbor = rpcTxOutput.script.script.value;
+        
         output.setScriptRef(
-          Script.newPlutusV1Script(
-            PlutusV1Script.fromCbor(HexBlob.fromBytes(cborUint8Array)),
-          ),
+          cborToScript(cbor.toString(), "PlutusV1"),
         );
       }
 
       if (rpcTxOutput.script.script.case === "plutusV2") {
-        const cborValue = cbor.encode(rpcTxOutput.script.script.value);
-        const cborUint8Array = new Uint8Array(cborValue);
+        // const cborValue = cbor.encode(rpcTxOutput.script.script.value);
+        // const cborUint8Array = new Uint8Array(cborValue);
+        const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV2Script(
-            PlutusV2Script.fromCbor(HexBlob.fromBytes(cborUint8Array)),
-          ),
+          cborToScript(cbor.toString(), "PlutusV2"),
         );
       }
 
       if (rpcTxOutput.script.script.case == "plutusV3") {
-        const cborValue = cbor.encode(rpcTxOutput.script.script.value);
-        const cborUint8Array = new Uint8Array(cborValue);
+        // const cborValue = cbor.encode(rpcTxOutput.script.script.value);
+        // const cborUint8Array = new Uint8Array(cborValue);
+        const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV3Script(
-            PlutusV3Script.fromCbor(HexBlob.fromBytes(cborUint8Array)),
-          ),
+          cborToScript(cbor.toString(), "PlutusV2"),
         );
       }
     }
