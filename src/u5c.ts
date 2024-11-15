@@ -47,7 +47,7 @@ export class U5C extends Provider {
     headers?: Record<string, string>;
     network: NetworkId;
   }) {
-    super(network === NetworkId.Mainnet ? NetworkId.Mainnet : NetworkId.Testnet);
+    super(network);
     this.queryClient = new CardanoQueryClient({
       uri: url,
       headers,
