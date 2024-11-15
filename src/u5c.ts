@@ -240,30 +240,23 @@ export class U5C implements Provider {
 
     if (rpcTxOutput.script !== undefined) {
       if (rpcTxOutput.script.script.case === "plutusV1") {
-        // const cborValue = cbor.encode(rpcTxOutput.script.script.value);
-        // const cborUint8Array = new Uint8Array(cborValue);
         const cbor = rpcTxOutput.script.script.value;
-        
         output.setScriptRef(
-          cborToScript(cbor.toString(), "PlutusV1"),
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV1"),
         );
       }
 
       if (rpcTxOutput.script.script.case === "plutusV2") {
-        // const cborValue = cbor.encode(rpcTxOutput.script.script.value);
-        // const cborUint8Array = new Uint8Array(cborValue);
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          cborToScript(cbor.toString(), "PlutusV2"),
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
         );
       }
 
       if (rpcTxOutput.script.script.case == "plutusV3") {
-        // const cborValue = cbor.encode(rpcTxOutput.script.script.value);
-        // const cborUint8Array = new Uint8Array(cborValue);
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          cborToScript(cbor.toString(), "PlutusV2"),
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
         );
       }
     }
