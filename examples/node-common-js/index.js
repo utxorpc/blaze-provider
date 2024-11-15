@@ -4,6 +4,7 @@ const {
     Bip32PrivateKey,
     mnemonicToEntropy,
     wordlist,
+    NetworkId,
 } = require("@blaze-cardano/core");
 
 const { HotWallet, Core, Blaze } = require("@blaze-cardano/sdk");
@@ -16,7 +17,8 @@ async function main() {
     // but you can run a local Dolos https://github.com/txpipe/dolos instance and connect to its UTxO endpoint
     // If this is the case then you can remove the headers field
     const provider = new U5C({
-        url: "http://localhost:50051"
+        url: "http://localhost:50051",
+        network: NetworkId.Testnet
     });
 
     // Step #3
