@@ -30,7 +30,7 @@ import {
   hardCodedProtocolParams,
   PlutusV3Script,
 } from "@blaze-cardano/core";
-import{ Provider } from "@blaze-cardano/query";
+import { Provider } from "@blaze-cardano/query";
 import { cborToScript } from "@blaze-cardano/sdk";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
@@ -250,21 +250,33 @@ export class U5C extends Provider {
       if (rpcTxOutput.script.script.case === "plutusV1") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV1"),
+          Script.newPlutusV1Script(
+            PlutusV1Script.fromCbor(
+              HexBlob.fromBytes(cbor)
+            )
+          )
         );
       }
 
       if (rpcTxOutput.script.script.case === "plutusV2") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
+          Script.newPlutusV2Script(
+            PlutusV2Script.fromCbor(
+              HexBlob.fromBytes(cbor)
+            )
+          )
         );
       }
 
       if (rpcTxOutput.script.script.case == "plutusV3") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
+          Script.newPlutusV3Script(
+            PlutusV3Script.fromCbor(
+              HexBlob.fromBytes(cbor)
+            )
+          )
         );
       }
     }
@@ -313,21 +325,21 @@ export class U5C extends Provider {
           rpcPParams.costModels?.plutusV1?.values.map((v) =>
             Number(v.toString()),
           ) ??
-            hardCodedProtocolParams.costModels.get(PlutusLanguageVersion.V1) ??
-            [],
+          hardCodedProtocolParams.costModels.get(PlutusLanguageVersion.V1) ??
+          [],
         )
         .set(
           PlutusLanguageVersion.V2,
           rpcPParams.costModels?.plutusV2?.values.map((v) =>
             Number(v.toString()),
           ) ??
-            hardCodedProtocolParams.costModels.get(PlutusLanguageVersion.V2) ??
-            [],
+          hardCodedProtocolParams.costModels.get(PlutusLanguageVersion.V2) ??
+          [],
         )
         .set(
           PlutusLanguageVersion.V3,
           hardCodedProtocolParams.costModels.get(PlutusLanguageVersion.V3) ??
-            [],
+          [],
         ),
       maxBlockBodySize: Number(rpcPParams.maxBlockBodySize),
       maxBlockHeaderSize: Number(rpcPParams.maxBlockHeaderSize),
