@@ -1,12 +1,14 @@
-import type {
+import {
   ProtocolParameters,
   Transaction,
   Redeemers,
   TokenMap,
   CostModels,
+  Address,
+  Hash28ByteBase16,
+  NetworkId,
 } from "@blaze-cardano/core";
 import {
-  Address,
   TransactionUnspentOutput,
   AssetId,
   TransactionInput,
@@ -29,21 +31,24 @@ import {
   PlutusV3Script,
 } from "@blaze-cardano/core";
 import type { Provider } from "@blaze-cardano/query";
+import { cborToScript } from "@blaze-cardano/sdk";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
 import type * as spec from "@utxorpc/spec";
 
-export class U5C implements Provider {
+export class U5C extends Provider {
   private queryClient: CardanoQueryClient;
   private submitClient: CardanoSubmitClient;
-
   constructor({
     url,
     headers,
+    network
   }: {
     url: string;
     headers?: Record<string, string>;
+    network: NetworkId;
   }) {
+    super(network);
     this.queryClient = new CardanoQueryClient({
       uri: url,
       headers,
@@ -53,6 +58,10 @@ export class U5C implements Provider {
       uri: url,
       headers,
     });
+  }
+
+  resolveScriptRef(script: Script | Hash28ByteBase16, address?: Address): Promise<TransactionUnspentOutput | undefined> {
+    return super.resolveScriptRef(script, address);
   }
 
   async getParameters(): Promise<ProtocolParameters> {
@@ -241,27 +250,21 @@ export class U5C implements Provider {
       if (rpcTxOutput.script.script.case === "plutusV1") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV1Script(
-            PlutusV1Script.fromCbor(HexBlob.fromBytes(cbor)),
-          ),
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV1"),
         );
       }
 
       if (rpcTxOutput.script.script.case === "plutusV2") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV2Script(
-            PlutusV2Script.fromCbor(HexBlob.fromBytes(cbor)),
-          ),
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
         );
       }
 
       if (rpcTxOutput.script.script.case == "plutusV3") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV3Script(
-            PlutusV3Script.fromCbor(HexBlob.fromBytes(cbor)),
-          ),
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
         );
       }
     }
