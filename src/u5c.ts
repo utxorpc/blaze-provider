@@ -30,7 +30,7 @@ import {
   hardCodedProtocolParams,
   PlutusV3Script,
 } from "@blaze-cardano/core";
-import type { Provider } from "@blaze-cardano/query";
+import{ Provider } from "@blaze-cardano/query";
 import { cborToScript } from "@blaze-cardano/sdk";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
@@ -60,7 +60,7 @@ export class U5C extends Provider {
     });
   }
 
-  resolveScriptRef(script: Script | Hash28ByteBase16, address?: Address): Promise<TransactionUnspentOutput | undefined> {
+  async resolveScriptRef(script: Script | Hash28ByteBase16, address?: Address): Promise<TransactionUnspentOutput | undefined> {
     return super.resolveScriptRef(script, address);
   }
 
