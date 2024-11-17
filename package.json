@@ -1,6 +1,6 @@
 {
   "name": "@utxorpc/blaze-provider",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An UTxO RPC provider for the Blaze transaction builder",
   "main": "./lib/index.js",
   "exports": {
