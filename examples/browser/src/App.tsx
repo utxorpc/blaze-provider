@@ -15,7 +15,7 @@ import { U5C } from "@utxorpc/blaze-provider";
 async function main() {
   // Step #2
   // Create a new U5C provider
-  // In this example we use Demeter hosted UTXO provider
+  // In this example we use Demeter hosted UTxO provider
   // but you can run a local Dolos https://github.com/txpipe/dolos instance and connect to its UTxO endpoint
   // If this is the case then you can remove the headers field
   const provider = new U5C({
