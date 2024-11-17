@@ -1,12 +1,14 @@
-import type {
+import {
   ProtocolParameters,
   Transaction,
   Redeemers,
   TokenMap,
   CostModels,
+  Address,
+  Hash28ByteBase16,
+  NetworkId,
 } from "@blaze-cardano/core";
 import {
-  Address,
   TransactionUnspentOutput,
   AssetId,
   TransactionInput,
@@ -34,17 +36,19 @@ import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
 import type * as spec from "@utxorpc/spec";
 
-export class U5C implements Provider {
+export class U5C extends Provider {
   private queryClient: CardanoQueryClient;
   private submitClient: CardanoSubmitClient;
-
   constructor({
     url,
     headers,
+    network
   }: {
     url: string;
     headers?: Record<string, string>;
+    network: NetworkId;
   }) {
+    super(network);
     this.queryClient = new CardanoQueryClient({
       uri: url,
       headers,
@@ -54,6 +58,10 @@ export class U5C implements Provider {
       uri: url,
       headers,
     });
+  }
+
+  resolveScriptRef(script: Script | Hash28ByteBase16, address?: Address): Promise<TransactionUnspentOutput | undefined> {
+    return super.resolveScriptRef(script, address);
   }
 
   async getParameters(): Promise<ProtocolParameters> {
