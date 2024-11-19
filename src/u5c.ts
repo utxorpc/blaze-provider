@@ -31,7 +31,7 @@ import {
   PlutusV3Script,
 } from "@blaze-cardano/core";
 import { Provider } from "@blaze-cardano/query";
-import { cborToScript } from "@blaze-cardano/sdk";
+import { cborToScript } from "./utils";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
 import type * as spec from "@utxorpc/spec";
@@ -250,33 +250,21 @@ export class U5C extends Provider {
       if (rpcTxOutput.script.script.case === "plutusV1") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV1Script(
-            PlutusV1Script.fromCbor(
-              HexBlob.fromBytes(cbor)
-            )
-          )
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV1"),
         );
       }
 
       if (rpcTxOutput.script.script.case === "plutusV2") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV2Script(
-            PlutusV2Script.fromCbor(
-              HexBlob.fromBytes(cbor)
-            )
-          )
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV2"),
         );
       }
 
       if (rpcTxOutput.script.script.case == "plutusV3") {
         const cbor = rpcTxOutput.script.script.value;
         output.setScriptRef(
-          Script.newPlutusV3Script(
-            PlutusV3Script.fromCbor(
-              HexBlob.fromBytes(cbor)
-            )
-          )
+          cborToScript(Buffer.from(cbor).toString('hex'), "PlutusV3"),
         );
       }
     }
