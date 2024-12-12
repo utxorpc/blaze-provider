@@ -232,12 +232,7 @@ export class U5C extends Provider {
     const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
     let redeemers: Redeemer[] = [];
     report.report[0].chain.value?.redeemers.forEach((redeemer: spec.cardano.Redeemer) => {
-      let coreTag = 0;
-      //Adjusts the purpose from 1-based in Dolos to 0-based in Blaze
-      if(redeemer.purpose > 0){
-        coreTag -= 1;
-      }
-      const tag: RedeemerTag = coreTag as RedeemerTag;
+      const tag: RedeemerTag = redeemer.purpose as number;
       const index: bigint = BigInt(redeemer.index);
       const data: PlutusData =  PlutusData.fromCbor(HexBlob.fromBytes(redeemer.originalCbor));
       const exUnits = new ExUnits(BigInt(redeemer.exUnits?.memory!), BigInt(redeemer.exUnits?.steps!));
