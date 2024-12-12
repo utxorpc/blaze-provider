@@ -7,6 +7,9 @@ import {
   Address,
   Hash28ByteBase16,
   NetworkId,
+  Redeemer,
+  RedeemerTag,
+  ExUnits,
 } from "@blaze-cardano/core";
 import {
   TransactionUnspentOutput,
@@ -85,7 +88,7 @@ export class U5C extends Provider {
         BigInt(item.txoRef.index),
       );
 
-      const output = this._rpcTxOutToCoreTxOut(item.parsedValued!);
+      const output = this._rpcTxOutToCoreTxOut(item.parsedValued! as spec.cardano.TxOutput);
       return new TransactionUnspentOutput(input, output);
     });
 
@@ -115,7 +118,7 @@ export class U5C extends Provider {
         BigInt(item.txoRef.index),
       );
 
-      const output = this._rpcTxOutToCoreTxOut(item.parsedValued!);
+      const output = this._rpcTxOutToCoreTxOut(item.parsedValued! as spec.cardano.TxOutput);
 
       return new TransactionUnspentOutput(input, output);
     });
@@ -144,7 +147,7 @@ export class U5C extends Provider {
       BigInt(item.txoRef.index),
     );
 
-    const output = this._rpcTxOutToCoreTxOut(item.parsedValued!);
+    const output = this._rpcTxOutToCoreTxOut(item.parsedValued! as spec.cardano.TxOutput);
 
     return new TransactionUnspentOutput(input, output);
   }
@@ -170,7 +173,7 @@ export class U5C extends Provider {
           BigInt(item.txoRef.index),
         );
 
-        const output = this._rpcTxOutToCoreTxOut(item.parsedValued!);
+        const output = this._rpcTxOutToCoreTxOut(item.parsedValued! as spec.cardano.TxOutput);
 
         return new TransactionUnspentOutput(input, output);
       }) ?? []
@@ -211,12 +214,39 @@ export class U5C extends Provider {
     return TransactionId(toHex(hash));
   }
 
-  evaluateTransaction(
+  async evaluateTransaction(
     tx: Transaction,
     additionalUtxos: TransactionUnspentOutput[],
   ): Promise<Redeemers> {
-    console.log("evaluateTransaction", tx, additionalUtxos);
-    throw new Error("Method not implemented.");
+    let additonalInputs: TransactionInput[] = [];
+    let additionalOutputs: TransactionOutput[] = [];
+    additionalUtxos.forEach((utxo) => {
+      additonalInputs.push(utxo.input());
+      additionalOutputs.push(utxo.output());
+    });
+    const finalInputs = tx.body().inputs().values().concat(additonalInputs);
+    const finalOutputs = tx.body().outputs().concat(additionalOutputs);
+    tx.body().inputs().setValues(finalInputs);
+    tx.body().setOutputs(finalOutputs);
+
+    const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
+    let redeemers: Redeemer[] = [];
+    report.report[0].chain.value?.redeemers.forEach((redeemer: spec.cardano.Redeemer) => {
+      let coreTag = 0;
+      if(redeemer.purpose > 0){
+        coreTag -= 1;
+      }
+      const tag: RedeemerTag = coreTag as RedeemerTag;
+      const index: bigint = BigInt(redeemer.index);
+      const data: PlutusData =  PlutusData.fromCbor(HexBlob.fromBytes(redeemer.originalCbor));
+      const exUnits = new ExUnits(BigInt(redeemer.exUnits?.memory!), BigInt(redeemer.exUnits?.steps!));
+      const coreRedeemer: Redeemer = new Redeemer(tag, index, data, exUnits);
+      redeemers.push(coreRedeemer);
+    });
+    const finalRedeemers = Redeemers.fromCore([]);
+    finalRedeemers.setValues(redeemers);
+
+    return finalRedeemers;
   }
 
   private _rpcTxOutToCoreTxOut(
@@ -354,8 +384,8 @@ export class U5C extends Provider {
       maxValueSize: Number(rpcPParams.maxValueSize),
       collateralPercentage: Number(rpcPParams.collateralPercentage),
       prices: {
-        memory: Number(rpcPParams.prices?.memory),
-        steps: Number(rpcPParams.prices?.steps),
+        memory: Number(rpcPParams.prices?.memory?.numerator! / rpcPParams.prices?.memory?.denominator!),
+        steps: Number(rpcPParams.prices?.steps?.numerator! / rpcPParams.prices?.steps?.denominator!),
       },
       maxExecutionUnitsPerTransaction: {
         memory: Number(rpcPParams.maxExecutionUnitsPerTransaction?.memory),

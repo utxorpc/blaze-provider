@@ -29,7 +29,7 @@
     "@blaze-cardano/sdk": "^0.2.6",
     "@blaze-cardano/tsconfig": "^0.0.2",
     "@utxorpc/sdk": "^0.6.4",
-    "@utxorpc/spec": "^0.12.0"
+    "@utxorpc/spec": "^0.14.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
