@@ -233,6 +233,7 @@ export class U5C extends Provider {
     let redeemers: Redeemer[] = [];
     report.report[0].chain.value?.redeemers.forEach((redeemer: spec.cardano.Redeemer) => {
       let coreTag = 0;
+      //Adjusts the purpose from 1-based in Dolos to 0-based in Blaze
       if(redeemer.purpose > 0){
         coreTag -= 1;
       }
