@@ -232,16 +232,12 @@ export class U5C extends Provider {
     const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
     let redeemers: Redeemer[] = [];
     report.report[0].chain.value?.redeemers.forEach((redeemer: spec.cardano.Redeemer) => {
-      const tag: RedeemerTag = redeemer.purpose as number;
-      const index: bigint = BigInt(redeemer.index);
-      const data: PlutusData =  PlutusData.fromCbor(HexBlob.fromBytes(redeemer.originalCbor));
-      const exUnits = new ExUnits(BigInt(redeemer.exUnits?.memory!), BigInt(redeemer.exUnits?.steps!));
-      const coreRedeemer: Redeemer = new Redeemer(tag, index, data, exUnits);
+      const coreRedeemer = Redeemer.fromCbor(HexBlob.fromBytes(redeemer.originalCbor));
       redeemers.push(coreRedeemer);
     });
+    
     const finalRedeemers = Redeemers.fromCore([]);
     finalRedeemers.setValues(redeemers);
-
     return finalRedeemers;
   }
 
@@ -352,6 +348,9 @@ export class U5C extends Provider {
         )
         .set(
           PlutusLanguageVersion.V3,
+          rpcPParams.costModels?.plutusV3?.values.map((v) =>
+            Number(v.toString()),
+          ) ??
           hardCodedProtocolParams.costModels.get(PlutusLanguageVersion.V3) ??
           [],
         ),
