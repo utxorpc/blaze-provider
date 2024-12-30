@@ -386,6 +386,11 @@ export class U5C extends Provider {
         memory: Number(rpcPParams.maxExecutionUnitsPerTransaction?.memory),
         steps: Number(rpcPParams.maxExecutionUnitsPerTransaction?.steps),
       },
+      minFeeReferenceScripts: {
+        base: Number(rpcPParams.minFeeScriptRefCostPerByte?.numerator! / rpcPParams.minFeeScriptRefCostPerByte?.denominator!),
+        range: 25600,
+        multiplier: 1.2,
+      }
     };
   }
 }
