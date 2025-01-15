@@ -236,7 +236,7 @@ export class U5C extends Provider {
     let redeemers: Redeemer[] = [];
     for(let i = 0; i < evalResult.length; i++) {
       redeemers.push(new Redeemer(
-        unevaluatedRedeemers[i].tag()  ,
+        unevaluatedRedeemers[i].tag(),
         unevaluatedRedeemers[i].index(),
         unevaluatedRedeemers[i].data(),
         new ExUnits(
