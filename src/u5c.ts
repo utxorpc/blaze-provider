@@ -228,13 +228,23 @@ export class U5C extends Provider {
     const finalOutputs = tx.body().outputs().concat(additionalOutputs);
     tx.body().inputs().setValues(finalInputs);
     tx.body().setOutputs(finalOutputs);
-
+    const unevaluatedRedeemers = tx.witnessSet().redeemers()?.values()!;
+    
     const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
+    const evalResult = report.report[0].chain.value?.redeemers!;
+
     let redeemers: Redeemer[] = [];
-    report.report[0].chain.value?.redeemers.forEach((redeemer: spec.cardano.Redeemer) => {
-      const coreRedeemer = Redeemer.fromCbor(HexBlob.fromBytes(redeemer.originalCbor));
-      redeemers.push(coreRedeemer);
-    });
+    for(let i = 0; i < evalResult.length; i++) {
+      redeemers.push(new Redeemer(
+        unevaluatedRedeemers[i].tag(),
+        unevaluatedRedeemers[i].index(),
+        unevaluatedRedeemers[i].data(),
+        new ExUnits(
+          BigInt(evalResult[i].exUnits?.memory!),
+          BigInt(evalResult[i].exUnits?.steps!)
+        )
+      ))
+    }
     
     const finalRedeemers = Redeemers.fromCore([]);
     finalRedeemers.setValues(redeemers);
