@@ -24,12 +24,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@blaze-cardano/core": "^0.5.2",
-    "@blaze-cardano/query": "^0.3.2",
-    "@blaze-cardano/sdk": "^0.2.12",
+    "@blaze-cardano/core": "^0.6.1",
+    "@blaze-cardano/query": "^0.3.5",
+    "@blaze-cardano/sdk": "^0.2.19",
     "@blaze-cardano/tsconfig": "^0.0.3",
-    "@utxorpc/sdk": "^0.6.5",
-    "@utxorpc/spec": "^0.15.0",
+    "@utxorpc/sdk": "^0.6.6",
+    "@utxorpc/spec": "^0.16.0",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
