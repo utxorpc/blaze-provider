@@ -417,7 +417,7 @@ export class U5C extends Provider {
         return SLOT_CONFIG_NETWORK.Preview;
       default:
         // Default to preprod for testnet
-        return SLOT_CONFIG_NETWORK.Preview;
+        return SLOT_CONFIG_NETWORK.Preprod;
     }
   }
 
