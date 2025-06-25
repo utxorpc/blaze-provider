@@ -10,6 +10,8 @@ import {
   Redeemer,
   RedeemerTag,
   ExUnits,
+  Slot,
+  SLOT_CONFIG_NETWORK,
 } from "@blaze-cardano/core";
 import {
   TransactionUnspentOutput,
@@ -51,7 +53,8 @@ export class U5C extends Provider {
     headers?: Record<string, string>;
     network: NetworkId;
   }) {
-    super(network);
+    const networkName = network === NetworkId.Mainnet ? "cardano-mainnet" : "cardano-preprod";
+    super(network, networkName);
     this.queryClient = new CardanoQueryClient({
       uri: url,
       headers,
@@ -402,5 +405,30 @@ export class U5C extends Provider {
         multiplier: 1.2,
       }
     };
+  }
+
+  getSlotConfig() {
+    switch (this.networkName) {
+      case "cardano-mainnet":
+        return SLOT_CONFIG_NETWORK.Mainnet;
+      case "cardano-preprod":
+        return SLOT_CONFIG_NETWORK.Preprod;
+      case "cardano-preview":
+        return SLOT_CONFIG_NETWORK.Preview;
+      default:
+        // Default to preprod for testnet
+        return SLOT_CONFIG_NETWORK.Preview;
+    }
+  }
+
+  unixToSlot(unix_millis: number | bigint) {
+    const slotConfig = this.getSlotConfig();
+    const unixMs = Number(unix_millis);
+    return Slot(Math.floor((unixMs - slotConfig.zeroTime) / slotConfig.slotLength + slotConfig.zeroSlot));
+  }
+
+  slotToUnix(slot: Slot): number {
+    const slotConfig = this.getSlotConfig();
+    return slotConfig.zeroTime + (Number(slot.valueOf()) - slotConfig.zeroSlot) * slotConfig.slotLength;
   }
 }
