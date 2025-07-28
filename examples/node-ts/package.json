@@ -6,12 +6,12 @@
   "type": "module",
   "dependencies": {
     "@blaze-cardano/core": "^0.6.4",
-    "@blaze-cardano/query": "^0.5.0",
-    "@blaze-cardano/sdk": "^0.2.33",
+    "@blaze-cardano/query": "0.5.1",
+    "@blaze-cardano/sdk": "0.2.35",
     "@blaze-cardano/tsconfig": "^0.0.3",
-    "@utxorpc/blaze-provider": "../../",
-    "@utxorpc/sdk": "^0.6.7",
-    "@utxorpc/spec": "^0.16.0"
+    "@utxorpc/blaze-provider": "0.3.6",
+    "@utxorpc/sdk": "0.7.0",
+    "@utxorpc/spec": "0.17.0"
   },
   "devDependencies": {
     "tsx": "^4.19.0"
