@@ -4,11 +4,11 @@
     },
     "type": "module",
     "dependencies": {
-        "@blaze-cardano/core": "0.6.4",
-        "@blaze-cardano/query": "0.5.1",
-        "@blaze-cardano/sdk": "0.2.35",
+        "@blaze-cardano/core": "^0.7.0",
+        "@blaze-cardano/query": "^0.5.2",
+        "@blaze-cardano/sdk": "^0.2.41",
         "@utxorpc/blaze-provider": "../../",
-        "@utxorpc/sdk": "0.7.0",
-        "@utxorpc/spec": "0.17.0"
+        "@utxorpc/sdk": "^0.7.0",
+        "@utxorpc/spec": "^0.17.0"
     }
 }
