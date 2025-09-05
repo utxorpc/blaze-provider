@@ -1,13 +1,15 @@
 {
   "scripts": {
     "start": "tsx send-lovelace.ts",
+    "start:mint": "tsx mint-and-send.ts",
+    "start:plutus": "tsx plutus-mint.ts",
     "build": "tsc"
   },
   "type": "module",
   "dependencies": {
     "@blaze-cardano/core": "^0.7.0",
     "@blaze-cardano/query": "^0.5.2",
-    "@blaze-cardano/sdk": "^0.2.41",
+    "@blaze-cardano/sdk": "0.2.43",
     "@blaze-cardano/tsconfig": "^0.0.3",
     "@utxorpc/blaze-provider": "../../",
     "@utxorpc/sdk": "^0.7.0",

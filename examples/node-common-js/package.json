@@ -1,11 +1,13 @@
 {
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "start:mint": "node mint-and-send.js",
+        "start:plutus": "node plutus-mint.js"
     },
     "dependencies": {
         "@blaze-cardano/core": "^0.7.0",
         "@blaze-cardano/query": "^0.5.2",
-        "@blaze-cardano/sdk": "^0.2.41",
+        "@blaze-cardano/sdk": "0.2.43",
         "@utxorpc/blaze-provider": "../../",
         "@utxorpc/sdk": "^0.7.0",
         "@utxorpc/spec": "^0.17.0"
