@@ -8,7 +8,6 @@ import {
   Hash28ByteBase16,
   NetworkId,
   Redeemer,
-  RedeemerTag,
   ExUnits,
   Slot,
   SLOT_CONFIG_NETWORK,
@@ -26,17 +25,14 @@ import {
   PolicyId,
   AssetName,
   Datum,
-  PlutusV1Script,
   Script,
-  PlutusV2Script,
   fromHex,
   toHex,
   PlutusLanguageVersion,
   hardCodedProtocolParams,
-  PlutusV3Script,
 } from "@blaze-cardano/core";
 import { Provider } from "@blaze-cardano/query";
-import { cborToScript } from "./utils";
+import { cardanoBigintToNativeBigInt, cardanoBigintToNumber, cborToScript } from "./utils";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
 import type * as spec from "@utxorpc/spec";
@@ -221,8 +217,8 @@ export class U5C extends Provider {
     tx: Transaction,
     additionalUtxos: TransactionUnspentOutput[],
   ): Promise<Redeemers> {
-    let additonalInputs: TransactionInput[] = [];
-    let additionalOutputs: TransactionOutput[] = [];
+    const additonalInputs: TransactionInput[] = [];
+    const additionalOutputs: TransactionOutput[] = [];
     additionalUtxos.forEach((utxo) => {
       additonalInputs.push(utxo.input());
       additionalOutputs.push(utxo.output());
@@ -231,20 +227,20 @@ export class U5C extends Provider {
     const finalOutputs = tx.body().outputs().concat(additionalOutputs);
     tx.body().inputs().setValues(finalInputs);
     tx.body().setOutputs(finalOutputs);
-    const unevaluatedRedeemers = tx.witnessSet().redeemers()?.values()!;
+    const unevaluatedRedeemers = tx.witnessSet().redeemers()!.values()!;
 
     const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
-    const evalResult = report.report[0].chain.value?.redeemers!;
+    const evalResult = report.report!.chain.value!.redeemers!;
 
-    let redeemers: Redeemer[] = [];
+    const redeemers: Redeemer[] = [];
     for(let i = 0; i < evalResult.length; i++) {
       redeemers.push(new Redeemer(
         unevaluatedRedeemers[i].tag(),
         unevaluatedRedeemers[i].index(),
         unevaluatedRedeemers[i].data(),
         new ExUnits(
-          BigInt(evalResult[i].exUnits?.memory!),
-          BigInt(evalResult[i].exUnits?.steps!)
+          evalResult[i].exUnits!.memory!,
+          evalResult[i].exUnits!.steps!
         )
       ));
     }
@@ -309,7 +305,7 @@ export class U5C extends Provider {
 
   private _rpcTxOutToCoreValue(rpcTxOutput: spec.cardano.TxOutput): Value {
     return new Value(
-      BigInt(rpcTxOutput.coin),
+      rpcTxOutput.coin ? cardanoBigintToNativeBigInt(rpcTxOutput.coin) : 0n,
       this._rpcMultiAssetOutputToTokenMap(rpcTxOutput.assets),
     );
   }
@@ -325,7 +321,12 @@ export class U5C extends Provider {
           AssetName(Buffer.from(asset.name).toString("hex")),
         );
 
-        const quantity = BigInt(asset.outputCoin);
+        let quantity: bigint;
+        if (asset.quantity.case == "outputCoin") {
+          quantity = cardanoBigintToNativeBigInt(asset.quantity.value);
+        } else {
+          quantity = 0n;
+        }
 
         if (tokenMap.has(assetId)) {
           tokenMap.set(assetId, tokenMap.get(assetId)! + quantity);
@@ -341,7 +342,7 @@ export class U5C extends Provider {
     rpcPParams: spec.cardano.PParams,
   ): ProtocolParameters {
     return {
-      coinsPerUtxoByte: Number(rpcPParams.coinsPerUtxoByte),
+      coinsPerUtxoByte: cardanoBigintToNumber(rpcPParams.coinsPerUtxoByte!),
       costModels: (new Map() as CostModels)
         .set(
           PlutusLanguageVersion.V1,
@@ -375,16 +376,16 @@ export class U5C extends Provider {
         memory: Number(rpcPParams.maxExecutionUnitsPerBlock?.memory),
       },
       maxTxSize: Number(rpcPParams.maxTxSize),
-      minFeeConstant: Number(rpcPParams.minFeeConstant),
-      minFeeCoefficient: Number(rpcPParams.minFeeCoefficient),
-      minPoolCost: Number(rpcPParams.minPoolCost),
-      poolDeposit: Number(rpcPParams.poolDeposit),
-      stakeKeyDeposit: Number(rpcPParams.stakeKeyDeposit),
+      minFeeConstant: cardanoBigintToNumber(rpcPParams.minFeeConstant!),
+      minFeeCoefficient: cardanoBigintToNumber(rpcPParams.minFeeCoefficient!),
+      minPoolCost: cardanoBigintToNumber(rpcPParams.minPoolCost!),
+      poolDeposit: cardanoBigintToNumber(rpcPParams.poolDeposit!),
+      stakeKeyDeposit: cardanoBigintToNumber(rpcPParams.stakeKeyDeposit!),
       poolRetirementEpochBound: Number(rpcPParams.poolRetirementEpochBound),
       desiredNumberOfPools: Number(rpcPParams.desiredNumberOfPools),
-      poolInfluence: `${rpcPParams.poolInfluence?.numerator! / rpcPParams.poolInfluence?.denominator!}`,
-      monetaryExpansion: `${rpcPParams.monetaryExpansion?.numerator! / rpcPParams.monetaryExpansion?.denominator!}`,
-      treasuryExpansion: `${rpcPParams.treasuryExpansion?.numerator! / rpcPParams.treasuryExpansion?.denominator!}`,
+      poolInfluence: `${rpcPParams.poolInfluence!.numerator! / rpcPParams.poolInfluence!.denominator!}`,
+      monetaryExpansion: `${rpcPParams.monetaryExpansion!.numerator! / rpcPParams.monetaryExpansion!.denominator!}`,
+      treasuryExpansion: `${rpcPParams.treasuryExpansion!.numerator! / rpcPParams.treasuryExpansion!.denominator!}`,
       protocolVersion: {
         minor: Number(rpcPParams.protocolVersion?.minor),
         major: Number(rpcPParams.protocolVersion?.major),
@@ -392,15 +393,15 @@ export class U5C extends Provider {
       maxValueSize: Number(rpcPParams.maxValueSize),
       collateralPercentage: Number(rpcPParams.collateralPercentage),
       prices: {
-        memory: Number(rpcPParams.prices?.memory?.numerator! / rpcPParams.prices?.memory?.denominator!),
-        steps: Number(rpcPParams.prices?.steps?.numerator! / rpcPParams.prices?.steps?.denominator!),
+        memory: Number(rpcPParams.prices!.memory!.numerator! / rpcPParams.prices!.memory!.denominator!),
+        steps: Number(rpcPParams.prices!.steps!.numerator! / rpcPParams.prices!.steps!.denominator!),
       },
       maxExecutionUnitsPerTransaction: {
         memory: Number(rpcPParams.maxExecutionUnitsPerTransaction?.memory),
         steps: Number(rpcPParams.maxExecutionUnitsPerTransaction?.steps),
       },
       minFeeReferenceScripts: {
-        base: Number(rpcPParams.minFeeScriptRefCostPerByte?.numerator! / rpcPParams.minFeeScriptRefCostPerByte?.denominator!),
+        base: Number(rpcPParams.minFeeScriptRefCostPerByte!.numerator! / rpcPParams.minFeeScriptRefCostPerByte!.denominator!),
         range: 25600,
         multiplier: 1.2,
       }

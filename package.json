@@ -28,8 +28,8 @@
     "@blaze-cardano/query": "^0.5.2",
     "@blaze-cardano/sdk": "^0.2.41",
     "@blaze-cardano/tsconfig": "^0.0.3",
-    "@utxorpc/sdk": "^0.7.0",
-    "@utxorpc/spec": "^0.17.0",
+    "@utxorpc/sdk": "0.8.0",
+    "@utxorpc/spec": "^0.18.1",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
