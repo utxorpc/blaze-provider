@@ -36,6 +36,7 @@ import { cardanoBigintToNativeBigInt, cardanoBigintToNumber, cborToScript } from
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
 import type * as spec from "@utxorpc/spec";
+import { Buffer } from "buffer";
 
 export class U5C extends Provider {
   private queryClient: CardanoQueryClient;
