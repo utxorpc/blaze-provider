@@ -66,6 +66,26 @@ export class U5C extends Provider {
     });
   }
 
+  private _bytesToBigInt(bytes: Uint8Array): bigint {
+    if (bytes.length === 0) return 0n;
+    return BigInt(`0x${Buffer.from(bytes).toString("hex")}`);
+  }
+
+  private _rpcBigIntToNative(value?: spec.cardano.BigInt): bigint {
+    if (!value || value.bigInt.case === undefined) return 0n;
+
+    switch (value.bigInt.case) {
+      case "int":
+        return value.bigInt.value;
+      case "bigUInt":
+        return this._bytesToBigInt(value.bigInt.value);
+      case "bigNInt":
+        return -this._bytesToBigInt(value.bigInt.value);
+      default:
+        return 0n;
+    }
+  }
+
   async resolveScriptRef(script: Script | Hash28ByteBase16, address?: Address): Promise<TransactionUnspentOutput | undefined> {
     return super.resolveScriptRef(script, address);
   }
@@ -234,7 +254,11 @@ export class U5C extends Provider {
     const unevaluatedRedeemers = tx.witnessSet().redeemers()?.values()!;
 
     const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
-    const evalResult = report.report[0].chain.value?.redeemers!;
+    const chainEval = report.report?.chain;
+    if (!chainEval || chainEval.case !== "cardano") {
+      throw new Error("Unexpected evalTx response: missing Cardano report");
+    }
+    const evalResult = chainEval.value.redeemers ?? [];
 
     let redeemers: Redeemer[] = [];
     for(let i = 0; i < evalResult.length; i++) {
@@ -309,7 +333,7 @@ export class U5C extends Provider {
 
   private _rpcTxOutToCoreValue(rpcTxOutput: spec.cardano.TxOutput): Value {
     return new Value(
-      BigInt(rpcTxOutput.coin),
+      this._rpcBigIntToNative(rpcTxOutput.coin),
       this._rpcMultiAssetOutputToTokenMap(rpcTxOutput.assets),
     );
   }
@@ -325,7 +349,12 @@ export class U5C extends Provider {
           AssetName(Buffer.from(asset.name).toString("hex")),
         );
 
-        const quantity = BigInt(asset.outputCoin);
+        const quantity =
+          asset.quantity.case === "outputCoin"
+            ? this._rpcBigIntToNative(asset.quantity.value)
+            : asset.quantity.case === "mintCoin"
+            ? this._rpcBigIntToNative(asset.quantity.value)
+            : 0n;
 
         if (tokenMap.has(assetId)) {
           tokenMap.set(assetId, tokenMap.get(assetId)! + quantity);
@@ -341,7 +370,7 @@ export class U5C extends Provider {
     rpcPParams: spec.cardano.PParams,
   ): ProtocolParameters {
     return {
-      coinsPerUtxoByte: Number(rpcPParams.coinsPerUtxoByte),
+      coinsPerUtxoByte: Number(this._rpcBigIntToNative(rpcPParams.coinsPerUtxoByte)),
       costModels: (new Map() as CostModels)
         .set(
           PlutusLanguageVersion.V1,
@@ -375,11 +404,11 @@ export class U5C extends Provider {
         memory: Number(rpcPParams.maxExecutionUnitsPerBlock?.memory),
       },
       maxTxSize: Number(rpcPParams.maxTxSize),
-      minFeeConstant: Number(rpcPParams.minFeeConstant),
-      minFeeCoefficient: Number(rpcPParams.minFeeCoefficient),
-      minPoolCost: Number(rpcPParams.minPoolCost),
-      poolDeposit: Number(rpcPParams.poolDeposit),
-      stakeKeyDeposit: Number(rpcPParams.stakeKeyDeposit),
+      minFeeConstant: Number(this._rpcBigIntToNative(rpcPParams.minFeeConstant)),
+      minFeeCoefficient: Number(this._rpcBigIntToNative(rpcPParams.minFeeCoefficient)),
+      minPoolCost: Number(this._rpcBigIntToNative(rpcPParams.minPoolCost)),
+      poolDeposit: Number(this._rpcBigIntToNative(rpcPParams.poolDeposit)),
+      stakeKeyDeposit: Number(this._rpcBigIntToNative(rpcPParams.stakeKeyDeposit)),
       poolRetirementEpochBound: Number(rpcPParams.poolRetirementEpochBound),
       desiredNumberOfPools: Number(rpcPParams.desiredNumberOfPools),
       poolInfluence: `${rpcPParams.poolInfluence?.numerator! / rpcPParams.poolInfluence?.denominator!}`,
