@@ -8,7 +8,6 @@ import {
   Hash28ByteBase16,
   NetworkId,
   Redeemer,
-  RedeemerTag,
   ExUnits,
   Slot,
   SLOT_CONFIG_NETWORK,
@@ -26,16 +25,13 @@ import {
   PolicyId,
   AssetName,
   Datum,
-  PlutusV1Script,
   Script,
-  PlutusV2Script,
   fromHex,
   toHex,
   PlutusLanguageVersion,
   hardCodedProtocolParams,
-  PlutusV3Script,
 } from "@blaze-cardano/core";
-import { Provider } from "@blaze-cardano/query";
+import { Provider, findScriptRefInAddressUtxos } from "@blaze-cardano/query";
 import { cborToScript } from "./utils";
 import { CardanoQueryClient, CardanoSubmitClient } from "@utxorpc/sdk";
 import { submit } from "@utxorpc/spec";
@@ -86,8 +82,13 @@ export class U5C extends Provider {
     }
   }
 
+  private _rpcRatioToNumber(ratio?: spec.cardano.RationalNumber): number {
+    if (!ratio) return NaN;
+    return ratio.numerator / ratio.denominator;
+  }
+
   async resolveScriptRef(script: Script | Hash28ByteBase16, address?: Address): Promise<TransactionUnspentOutput | undefined> {
-    return super.resolveScriptRef(script, address);
+    return findScriptRefInAddressUtxos(this, script, address);
   }
 
   async getParameters(): Promise<ProtocolParameters> {
@@ -241,8 +242,8 @@ export class U5C extends Provider {
     tx: Transaction,
     additionalUtxos: TransactionUnspentOutput[],
   ): Promise<Redeemers> {
-    let additonalInputs: TransactionInput[] = [];
-    let additionalOutputs: TransactionOutput[] = [];
+    const additonalInputs: TransactionInput[] = [];
+    const additionalOutputs: TransactionOutput[] = [];
     additionalUtxos.forEach((utxo) => {
       additonalInputs.push(utxo.input());
       additionalOutputs.push(utxo.output());
@@ -251,7 +252,7 @@ export class U5C extends Provider {
     const finalOutputs = tx.body().outputs().concat(additionalOutputs);
     tx.body().inputs().setValues(finalInputs);
     tx.body().setOutputs(finalOutputs);
-    const unevaluatedRedeemers = tx.witnessSet().redeemers()?.values()!;
+    const unevaluatedRedeemers = tx.witnessSet().redeemers()?.values() ?? [];
 
     const report = await this.submitClient.evalTx(fromHex(tx.toCbor()));
     const chainEval = report.report?.chain;
@@ -260,16 +261,25 @@ export class U5C extends Provider {
     }
     const evalResult = chainEval.value.redeemers ?? [];
 
-    let redeemers: Redeemer[] = [];
+    const redeemers: Redeemer[] = [];
     for(let i = 0; i < evalResult.length; i++) {
+      const unevaluated = unevaluatedRedeemers[i];
+      if (unevaluated === undefined) {
+        throw new Error(
+          `evaluateTransaction: evaluation returned more redeemers than the transaction contains`,
+        );
+      }
+      const exUnits = evalResult[i]?.exUnits;
+      if (exUnits === undefined) {
+        throw new Error(
+          `evaluateTransaction: missing execution units for redeemer at index ${i}`,
+        );
+      }
       redeemers.push(new Redeemer(
-        unevaluatedRedeemers[i].tag(),
-        unevaluatedRedeemers[i].index(),
-        unevaluatedRedeemers[i].data(),
-        new ExUnits(
-          BigInt(evalResult[i].exUnits?.memory!),
-          BigInt(evalResult[i].exUnits?.steps!)
-        )
+        unevaluated.tag(),
+        unevaluated.index(),
+        unevaluated.data(),
+        new ExUnits(BigInt(exUnits.memory), BigInt(exUnits.steps))
       ));
     }
 
@@ -411,9 +421,9 @@ export class U5C extends Provider {
       stakeKeyDeposit: Number(this._rpcBigIntToNative(rpcPParams.stakeKeyDeposit)),
       poolRetirementEpochBound: Number(rpcPParams.poolRetirementEpochBound),
       desiredNumberOfPools: Number(rpcPParams.desiredNumberOfPools),
-      poolInfluence: `${rpcPParams.poolInfluence?.numerator! / rpcPParams.poolInfluence?.denominator!}`,
-      monetaryExpansion: `${rpcPParams.monetaryExpansion?.numerator! / rpcPParams.monetaryExpansion?.denominator!}`,
-      treasuryExpansion: `${rpcPParams.treasuryExpansion?.numerator! / rpcPParams.treasuryExpansion?.denominator!}`,
+      poolInfluence: `${this._rpcRatioToNumber(rpcPParams.poolInfluence)}`,
+      monetaryExpansion: `${this._rpcRatioToNumber(rpcPParams.monetaryExpansion)}`,
+      treasuryExpansion: `${this._rpcRatioToNumber(rpcPParams.treasuryExpansion)}`,
       protocolVersion: {
         minor: Number(rpcPParams.protocolVersion?.minor),
         major: Number(rpcPParams.protocolVersion?.major),
@@ -421,15 +431,15 @@ export class U5C extends Provider {
       maxValueSize: Number(rpcPParams.maxValueSize),
       collateralPercentage: Number(rpcPParams.collateralPercentage),
       prices: {
-        memory: Number(rpcPParams.prices?.memory?.numerator! / rpcPParams.prices?.memory?.denominator!),
-        steps: Number(rpcPParams.prices?.steps?.numerator! / rpcPParams.prices?.steps?.denominator!),
+        memory: Number(this._rpcRatioToNumber(rpcPParams.prices?.memory)),
+        steps: Number(this._rpcRatioToNumber(rpcPParams.prices?.steps)),
       },
       maxExecutionUnitsPerTransaction: {
         memory: Number(rpcPParams.maxExecutionUnitsPerTransaction?.memory),
         steps: Number(rpcPParams.maxExecutionUnitsPerTransaction?.steps),
       },
       minFeeReferenceScripts: {
-        base: Number(rpcPParams.minFeeScriptRefCostPerByte?.numerator! / rpcPParams.minFeeScriptRefCostPerByte?.denominator!),
+        base: Number(this._rpcRatioToNumber(rpcPParams.minFeeScriptRefCostPerByte)),
         range: 25600,
         multiplier: 1.2,
       }
